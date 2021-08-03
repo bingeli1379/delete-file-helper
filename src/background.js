@@ -19,6 +19,7 @@ async function createWindow () {
     width: 800,
     height: 600,
     icon: path.join(__static, 'icon.png'),
+    autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
       preload: path.join(__dirname, 'preload.js'),

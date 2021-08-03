@@ -1,22 +1,6 @@
 const fs = require('fs')
 const { ipcMain } = require('electron')
 
-// function getChildPath (path) {
-//   let files = []
-//   if (fs.existsSync(path)) {
-//     files = fs.readdirSync(path)
-//     files.forEach((file, index) => {
-//       const curPath = path + '/' + file
-//       if (fs.statSync(curPath).isDirectory()) {
-//         delDir(curPath) // 遞迴刪除資料夾
-//       } else {
-//         fs.unlinkSync(curPath) // 刪除檔案
-//       }
-//     })
-//     fs.rmdirSync(path)
-//   }
-// }
-
 function getFilePath (path) {
   let filePaths = []
   const fileList = fs.readdirSync(path)
@@ -26,7 +10,9 @@ function getFilePath (path) {
       const data = getFilePath(currentFilePath)
       filePaths = filePaths.concat(data)
     } else {
-      filePaths.push(currentFilePath)
+      if (currentFilePath.slice(currentFilePath.length - 4, currentFilePath.length) === '.dwg') {
+        filePaths.push(currentFilePath)
+      }
     }
   })
   return filePaths

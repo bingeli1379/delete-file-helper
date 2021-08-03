@@ -63,8 +63,6 @@ export default {
         return [{ name: '沒有任何檔案' }]
       } else {
         return this.filePaths.filter(path => {
-          return path.slice(path.length - 4, path.length) === '.dwg'
-        }).filter(path => {
           const lastBackslashIndex = path.lastIndexOf('\\') + 1
           const pathLength = path.length
           const fileName = path.slice(lastBackslashIndex, pathLength)
@@ -132,6 +130,9 @@ export default {
           this.isLoading = true
           const filePathList = this.filePaths.length === 0 ? [] : this.filterWantDeleteFileList.map(item => item.name)
           await window.ipcRenderer.invoke('deleteFile', this.folderPath, filePathList)
+          this.folderPath = ''
+          this.keepFileList = []
+          this.filePaths = []
           this.$bvModal.msgBoxOk('刪除成功', { title: '成功' })
           this.isLoading = false
         } catch (error) {
