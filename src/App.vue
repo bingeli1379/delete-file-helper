@@ -23,7 +23,14 @@
           <b-link @click="downloadWantDeleteFileList">下載檔案</b-link>
           <input ref="file" type="file" class="d-none" accept=".csv" @change="getKeepFileList">
         </div>
-        <b-table outlined small sticky-header :items="filterWantDeleteFileList" :fields="fields"></b-table>
+        <b-table outlined small sticky-header :items="filterWantDeleteFileList" :fields="fields" class="mb-4"></b-table>
+
+        <div class="d-flex justify-content-between border border-bottom-0 p-2">
+          <h5 class="text-warning font-weight-bold mb-0">預計保留但沒有檔案</h5>
+          <b-link @click="downloadNotFoundList">下載檔案</b-link>
+          <input ref="file" type="file" class="d-none" accept=".csv" @change="getKeepFileList">
+        </div>
+        <b-table outlined small sticky-header :items="notFoundList" :fields="fields"></b-table>
 
         <b-button block variant="danger" @click="deleteFile">
           刪除檔案
@@ -69,6 +76,15 @@ export default {
           return !this.keepFileList.some(keepFileName => fileName.indexOf(keepFileName) !== -1)
         }).map(item => ({ name: item }))
       }
+    },
+    notFoundList () {
+      if (this.keepFileList.length === 0 || this.filePaths.length === 0) {
+        return [{ name: '沒有任何檔案' }]
+      } else {
+        return this.keepFileList.filter(item => {
+          return this.filePaths.every(path => path.indexOf(item) === -1)
+        }).map(item => ({ name: item }))
+      }
     }
   },
   methods: {
@@ -106,7 +122,11 @@ export default {
       }
     },
     csvToArray (data) {
-      return data.replace(/\r\n/g, '').split(',').filter(item => item).map(item => item?.trim())
+      if (data.indexOf(',') === -1) {
+        return data.replace(/\r\n/g, ',').split(',').filter(item => item).map(item => item?.trim())
+      } else {
+        return data.replace(/\r\n/g, '').split(',').filter(item => item).map(item => item?.trim())
+      }
     },
     clickFile () {
       this.$refs.file.click()
@@ -116,11 +136,21 @@ export default {
         return this.$bvModal.msgBoxOk('請先選擇資料夾路徑', { title: '錯誤' })
       }
       const dataList = this.filterWantDeleteFileList.map(item => item.name).join(',\n')
-      console.log(dataList)
       const blob = new Blob([dataList], { type: 'text/csv' })
       const downloadLink = document.createElement('a')
       downloadLink.href = window.URL.createObjectURL(blob)
       downloadLink.download = 'deleteList.csv'
+      downloadLink.click()
+    },
+    downloadNotFoundList () {
+      if (this.keepFileList.length === 0 || this.filePaths.length === 0) {
+        return this.$bvModal.msgBoxOk('請先選擇資料夾路徑與保留資料清單', { title: '錯誤' })
+      }
+      const dataList = this.notFoundList.map(item => item.name).join(',\n')
+      const blob = new Blob([dataList], { type: 'text/csv' })
+      const downloadLink = document.createElement('a')
+      downloadLink.href = window.URL.createObjectURL(blob)
+      downloadLink.download = 'notFoundList.csv'
       downloadLink.click()
     },
     deleteFile () {
